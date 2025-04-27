@@ -8,19 +8,28 @@ use crate::{
 };
 use anyhow::Result;
 use clap::Args;
-use std::{collections::HashMap, path::PathBuf};
+use std::{collections::HashMap, path::PathBuf, str::FromStr};
+use yansi::Paint;
 
-/// Initialize a ner project
+/// Initialize a new project
 #[derive(Args)]
 pub struct Init {
-    #[arg(default_value = ".")]
+    /// Target project directory
+    #[arg(short = 'D', long, default_value = ".")]
     directory: PathBuf,
 
+    /// Used mod or plugin loader
     #[arg(short, long)]
     loader: Option<Loader>,
 
+    /// Used Minecraft game version
     #[arg(short, long)]
     game_version: Option<String>,
+
+    /// Directory where artifacts will be stored
+    /// relative to the project directory
+    #[arg(short, long)]
+    artifacts_dir: Option<PathBuf>,
 }
 
 impl Command for Init {
@@ -57,21 +66,53 @@ impl Command for Init {
                     .iter()
                     .filter(|v| v.version_type == VersionType::Release)
                     .collect();
-                let p = inquire::Select::new("Game Version", release_versions);
+                let p = inquire::Select::new("Game version", release_versions);
                 p.prompt()?.version.clone()
+            }
+        };
+
+        let artifacts_dir = match &self.artifacts_dir {
+            Some(v) => v.clone(),
+            None => {
+                let p = inquire::Text::new("Artifacts directory")
+                    .with_default(default_artifacts_dir_for_loader(&loader));
+                PathBuf::from_str(&(p.prompt()?))?
             }
         };
 
         let project = Project {
             game_version,
             loader,
+            artifacts_dir,
             dependencies: HashMap::new(),
         };
 
         project.store(&self.directory)?;
 
-        println!("Project initialized.");
+        println!("{}", "Project initialized.".green());
 
         Ok(())
+    }
+}
+
+fn default_artifacts_dir_for_loader(loader: &Loader) -> &'static str {
+    match loader {
+        Loader::Bukkit
+        | Loader::Bungeecord
+        | Loader::Canvas
+        | Loader::Folia
+        | Loader::Paper
+        | Loader::Purpur
+        | Loader::Spigot
+        | Loader::Sponge
+        | Loader::Velocity
+        | Loader::Waterfall => "plugins",
+
+        Loader::Fabric
+        | Loader::Forge
+        | Loader::Liteloader
+        | Loader::Neoforge
+        | Loader::Quilt
+        | Loader::Rift => "mods",
     }
 }

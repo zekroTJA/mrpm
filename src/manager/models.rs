@@ -3,9 +3,9 @@ use anyhow::Result;
 use serde::{Deserialize, Serialize};
 use std::{
     collections::HashMap,
-    fs::File,
+    fs::{self, File},
     io::{ErrorKind, Read, Write},
-    path::Path,
+    path::{Path, PathBuf},
 };
 
 const PROJECT_FILENAME: &str = "mrpm.project.toml";
@@ -14,6 +14,7 @@ const PROJECT_FILENAME: &str = "mrpm.project.toml";
 pub struct Project {
     pub game_version: String,
     pub loader: Loader,
+    pub artifacts_dir: PathBuf,
     pub dependencies: HashMap<String, String>, // name: version
 }
 
@@ -30,7 +31,12 @@ impl Project {
     }
 
     pub fn store<P: AsRef<Path>>(&self, dir: P) -> Result<()> {
-        let mut f = File::create(dir.as_ref().join(PROJECT_FILENAME))?;
+        let dir = dir.as_ref();
+        if !dir.exists() {
+            fs::create_dir_all(dir)?;
+        }
+
+        let mut f = File::create(dir.join(PROJECT_FILENAME))?;
         let content = toml::to_string_pretty(self)?;
         Ok(f.write_all(content.as_bytes())?)
     }

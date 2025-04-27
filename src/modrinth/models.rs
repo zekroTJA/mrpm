@@ -82,7 +82,6 @@ parse_enum! {
     Fabric => "fabric",
     Folia => "folia",
     Forge => "forge",
-    Iris => "iris",
     Liteloader => "liteloader",
     Neoforge => "neoforge",
     Paper => "paper",

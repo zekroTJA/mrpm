@@ -21,6 +21,7 @@ reqwest = { version = "0.12.15", features = ["blocking", "json", "rustls-tls"] }
 serde_json = "1.0.140"
 inquire = "0.7.5"
 toml = "0.8.21"
+yansi = "1.0.1"
 
 [profile.release]
 strip = true
