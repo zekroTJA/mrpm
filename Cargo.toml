@@ -1,0 +1,30 @@
+[package]
+name = "mrpm"
+version = "0.1.0"
+edition = "2024"
+authors = ["zekroTJA <riho@live.de>"]
+description = "A Modrinth plugin/package manager"
+readme = "README.md"
+license = "MIT"
+license-file = "LICENSE"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+
+anyhow = "1"
+clap = { version = "4", features = ["derive"] }
+serde = { version = "1", features = ["derive"] }
+dirs = "6"
+figment = { version = "0.10", features = ["json", "yaml", "toml", "env"] }
+reqwest = { version = "0.12.15", features = ["blocking", "json", "rustls-tls"] }
+serde_json = "1.0.140"
+inquire = "0.7.5"
+toml = "0.8.21"
+
+[profile.release]
+strip = true
+opt-level = "s"
+codegen-units = 1
+lto = true
+panic = "unwind"
