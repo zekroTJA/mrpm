@@ -2,6 +2,7 @@ mod commands;
 mod config;
 mod manager;
 mod modrinth;
+mod output;
 
 use anyhow::Result;
 use clap::{Parser, command};
@@ -22,6 +23,7 @@ struct Cli {
 // List the names of your sub commands here.
 register_commands! {
     Init
+    Install
 }
 
 fn main() -> Result<()> {

@@ -77,7 +77,7 @@ pub fn search_projects(
 /// See: https://docs.modrinth.com/api/operations/getprojectversions/
 pub fn get_project_versions(
     id_or_slug: &str,
-    loaders: Option<&[Loader]>,
+    loaders: Option<&[&Loader]>,
     game_versions: Option<&[&str]>,
     featured: Option<bool>,
 ) -> Result<Vec<Version>> {
