@@ -4,10 +4,17 @@ use anyhow::Result;
 use clap::Args;
 use std::path::PathBuf;
 
-/// Initialize a new project
+const LONG_ABOUT: &str = "\
+Install new packages or install not installed packages defined in the project file.
+
+You can specify a specific version to install as following:
+$ mrpm install <project>@<version>";
+
+/// Install packages
 #[derive(Args)]
-#[command(alias = "i")]
+#[command(alias = "i", long_about = LONG_ABOUT)]
 pub struct Install {
+    // List of packages to install
     packages: Vec<InstallRef>,
 
     /// Target project directory
