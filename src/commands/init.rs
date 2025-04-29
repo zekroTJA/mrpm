@@ -8,16 +8,16 @@ use crate::{
 };
 use anyhow::Result;
 use clap::Args;
-use std::{collections::HashMap, path::PathBuf, str::FromStr};
+use std::{
+    collections::HashMap,
+    path::{Path, PathBuf},
+    str::FromStr,
+};
 use yansi::Paint;
 
 /// Initialize a new project
 #[derive(Args)]
 pub struct Init {
-    /// Target project directory
-    #[arg(short = 'D', long, default_value = ".")]
-    directory: PathBuf,
-
     /// Used mod or plugin loader
     #[arg(short, long)]
     loader: Option<Loader>,
@@ -33,8 +33,8 @@ pub struct Init {
 }
 
 impl Command for Init {
-    fn run(&self) -> Result<()> {
-        if Project::load(&self.directory)?.is_some() {
+    fn run(&self, target_dir: &Path) -> Result<()> {
+        if Project::load(target_dir)?.is_some() {
             let ok = inquire::Confirm::new(
                 "A project file already exists in this location. Do you want to re-initialize the project?",
             ).with_default(false).prompt()?;
@@ -87,7 +87,7 @@ impl Command for Init {
             dependencies: HashMap::new(),
         };
 
-        project.store(&self.directory)?;
+        project.store(target_dir)?;
 
         println!("{}", "Project initialized.".green());
 

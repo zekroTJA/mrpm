@@ -4,21 +4,17 @@ use anyhow::Result;
 use clap::Args;
 use std::path::Path;
 
-const LONG_ABOUT: &str = "\
-Install new packages or install not installed packages defined in the project file.
-
-You can specify a specific version to install as following:
-$ mrpm install <project>@<version>";
+const LONG_ABOUT: &str = "";
 
 /// Install packages
 #[derive(Args)]
-#[command(alias = "i", long_about = LONG_ABOUT)]
-pub struct Install {
+#[command(alias = "u", long_about = LONG_ABOUT)]
+pub struct Update {
     // List of packages to install
     packages: Vec<InstallRef>,
 }
 
-impl Command for Install {
+impl Command for Update {
     fn run(&self, target_dir: &Path) -> Result<()> {
         let mut manager = Manager::new(target_dir)?;
 
@@ -27,11 +23,14 @@ impl Command for Install {
                 .project
                 .dependencies
                 .iter()
-                .map(|kv| kv.into())
+                .map(|(k, _)| InstallRef {
+                    id_or_slug: k.into(),
+                    version: None,
+                })
                 .collect();
-            manager.install_packages(p.iter(), false)
+            manager.install_packages(p.iter(), true)
         } else {
-            manager.install_packages(self.packages.iter(), false)
+            manager.install_packages(self.packages.iter(), true)
         };
 
         manager.store()?;

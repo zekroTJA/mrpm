@@ -45,9 +45,10 @@ impl Project {
     }
 }
 
-#[derive(Serialize, Deserialize, Debug)]
+#[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct InstalledDependency {
-    pub version: String,
+    pub version_name: String,
+    pub version_id: String,
     pub file_name: String,
 }
 

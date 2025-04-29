@@ -2,7 +2,7 @@ pub mod models;
 
 use crate::{
     modrinth::{self, models::VersionType},
-    print_install_error, print_install_skipped, print_install_success,
+    print_install_error, print_install_new, print_install_skipped, print_install_updated,
 };
 use anyhow::Result;
 use models::{InstallRef, InstallState, Project};
@@ -13,6 +13,12 @@ use std::{
     path::PathBuf,
 };
 use yansi::Paint;
+
+pub enum InstallResult {
+    Skipped(String),
+    New(String),
+    Updated(String, String),
+}
 
 pub struct Manager {
     pub project: Project,
@@ -47,19 +53,18 @@ impl Manager {
         })
     }
 
-    pub fn install(
+    pub fn install_package(
         &mut self,
         slug_or_id: &str,
         version: Option<&str>,
         force: bool,
-    ) -> Result<bool> {
+    ) -> Result<InstallResult> {
         let installed_dep = self.state.installed_dependencies.get(slug_or_id);
 
-        if !force
-            && installed_dep
-                .is_some_and(|d| version.is_some_and(|v| v == d.version) || version.is_none())
-        {
-            return Ok(false);
+        if let Some(d) = installed_dep {
+            if !force && (version.is_some_and(|v| v == d.version_name) || version.is_none()) {
+                return Ok(InstallResult::Skipped(d.version_name.to_string()));
+            }
         }
 
         let versions = modrinth::get_project_versions(
@@ -80,6 +85,12 @@ impl Manager {
                 .or(versions.first()),
         }
         .ok_or_else(|| anyhow::anyhow!("no suitable version found"))?;
+
+        if let Some(d) = installed_dep {
+            if d.version_id == target_version.id {
+                return Ok(InstallResult::Skipped(d.version_name.to_string()));
+            }
+        }
 
         let file = target_version
             .files
@@ -105,19 +116,27 @@ impl Manager {
             .error_for_status()?
             .copy_to(&mut f)?;
 
-        self.state.installed_dependencies.insert(
-            slug_or_id.into(),
-            models::InstalledDependency {
-                version: target_version.version_number.clone(),
+        let res = match installed_dep {
+            Some(d) => Ok(InstallResult::Updated(
+                d.version_name.to_string(),
+                target_version.name.to_string(),
+            )),
+            None => Ok(InstallResult::New(target_version.name.to_string())),
+        };
+
+        self.state
+            .installed_dependencies
+            .insert(slug_or_id.into(), models::InstalledDependency {
+                version_name: target_version.version_number.clone(),
+                version_id: target_version.id.clone(),
                 file_name: file.filename.clone(),
-            },
-        );
+            });
 
         self.project
             .dependencies
             .insert(slug_or_id.into(), target_version.version_number.clone());
 
-        Ok(true)
+        res
     }
 
     pub fn install_packages<'a, I>(&mut self, packages: I, force: bool) -> bool
@@ -127,9 +146,10 @@ impl Manager {
         let mut is_err = false;
 
         for package in packages {
-            match self.install(&package.id_or_slug, package.version.as_deref(), force) {
-                Ok(true) => print_install_success!(package),
-                Ok(false) => print_install_skipped!(package),
+            match self.install_package(&package.id_or_slug, package.version.as_deref(), force) {
+                Ok(InstallResult::New(v)) => print_install_new!(package, v),
+                Ok(InstallResult::Updated(p, v)) => print_install_updated!(package, p, v),
+                Ok(InstallResult::Skipped(v)) => print_install_skipped!(package, v),
                 Err(err) => {
                     print_install_error!(package, "{err}");
                     is_err = true;

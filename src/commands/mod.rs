@@ -1,4 +1,5 @@
 use anyhow::Result;
+use std::path::Path;
 
 macro_rules! re_export {
     ( $( $md:tt )+ ) => {
@@ -14,10 +15,11 @@ macro_rules! re_export {
 re_export! {
     init
     install
+    update
 }
 
 pub trait Command {
-    fn run(&self) -> Result<()>;
+    fn run(&self, target_dir: &Path) -> Result<()>;
 }
 
 #[macro_export]
