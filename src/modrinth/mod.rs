@@ -60,12 +60,15 @@ where
 
 /// # Documentation
 /// See: https://docs.modrinth.com/api/operations/getprojectversions/
-pub fn get_project_versions(
+pub fn get_project_versions<S>(
     id_or_slug: &str,
     loaders: Option<&[&Loader]>,
-    game_versions: Option<&[&str]>,
+    game_versions: Option<&[S]>,
     featured: Option<bool>,
-) -> Result<Vec<Version>> {
+) -> Result<Vec<Version>>
+where
+    S: AsRef<str> + Serialize,
+{
     let mut url = Url::parse(&format!("{BASE_URL}/project/{id_or_slug}/version"))?;
 
     if let Some(loaders) = loaders {

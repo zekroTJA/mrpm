@@ -50,15 +50,12 @@ impl Command for Search {
     fn run(&self, target_dir: &Path) -> Result<()> {
         let project = Project::load(target_dir)?;
 
-        let loader = self
-            .loader
-            .as_ref()
-            .or(project.as_ref().and_then(|p| Some(&p.loader)));
+        let loader = self.loader.as_ref().or(project.as_ref().map(|p| &p.loader));
 
         let version = self
             .version
             .as_ref()
-            .or(project.as_ref().and_then(|p| Some(&p.game_version)));
+            .or(project.as_ref().map(|p| &p.game_version));
 
         let mut facets = vec![];
         if let Some(loader) = loader {
@@ -81,8 +78,8 @@ impl Command for Search {
                 println!(
                     "{} {} {}",
                     r.title.green().bold(),
-                    format!("by {}", r.author).dim(),
-                    format!("{}{}{}", '['.dim(), r.project_id.cyan(), ']'.dim()),
+                    format_args!("by {}", r.author).dim(),
+                    format_args!("{}{}{}", '['.dim(), r.project_id.cyan(), ']'.dim()),
                 );
             } else {
                 println!(
@@ -90,8 +87,8 @@ impl Command for Search {
                     {}\n\
                     Categories: {}\n",
                     r.title.green().bold(),
-                    format!("by {}", r.author).dim(),
-                    format!("{}{}{}", '['.dim(), r.project_id.cyan(), ']'.dim()),
+                    format_args!("by {}", r.author).dim(),
+                    format_args!("{}{}{}", '['.dim(), r.project_id.cyan(), ']'.dim()),
                     r.description,
                     r.categories.join(", ")
                 );

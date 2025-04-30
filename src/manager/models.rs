@@ -111,7 +111,7 @@ impl fmt::Display for InstallRef {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         write!(f, "{}", self.id_or_slug)?;
         if let Some(ref v) = self.version {
-            write!(f, "@{}", v)?;
+            write!(f, "@{v}")?;
         }
         Ok(())
     }

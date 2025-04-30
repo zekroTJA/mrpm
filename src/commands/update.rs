@@ -23,8 +23,8 @@ impl Command for Update {
             let p: Vec<InstallRef> = manager
                 .project
                 .dependencies
-                .iter()
-                .map(|(k, _)| InstallRef {
+                .keys()
+                .map(|k| InstallRef {
                     id_or_slug: k.into(),
                     version: None,
                 })
