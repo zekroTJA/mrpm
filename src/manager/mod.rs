@@ -115,7 +115,7 @@ impl Manager {
         let res = match installed_dep {
             Some(d) => Ok(InstallResult::Updated(
                 d.version_name.to_string(),
-                target_version.name.to_string(),
+                target_version.version_number.to_string(),
             )),
             None => Ok(InstallResult::New(target_version.version_number.clone())),
         };
