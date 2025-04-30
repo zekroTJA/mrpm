@@ -1,5 +1,5 @@
 use super::Command;
-use crate::manager::models::Project;
+use crate::manager::models::{GameVersion, Project};
 use crate::modrinth::models::{Loader, VersionType};
 use crate::modrinth::{self};
 use anyhow::Result;
@@ -75,7 +75,7 @@ impl Command for Init {
         };
 
         let project = Project {
-            game_version,
+            game_version: GameVersion::Single(game_version),
             loader,
             artifacts_dir,
             dependencies: HashMap::new(),

@@ -11,9 +11,25 @@ use std::str::FromStr;
 const PROJECT_FILENAME: &str = "mrpm.project.toml";
 const INSTALLSTATE_FILENAME: &str = ".mrpm.install-state.json";
 
+#[derive(Serialize, Deserialize, Debug, Clone)]
+#[serde(untagged)]
+pub enum GameVersion {
+    Single(String),
+    Multiple(Vec<String>),
+}
+
+impl GameVersion {
+    pub fn as_list(&self) -> &[String] {
+        match self {
+            GameVersion::Single(s) => std::slice::from_ref(s),
+            GameVersion::Multiple(v) => v.as_slice(),
+        }
+    }
+}
+
 #[derive(Serialize, Deserialize, Debug)]
 pub struct Project {
-    pub game_version: String,
+    pub game_version: GameVersion,
     pub loader: Loader,
     pub artifacts_dir: PathBuf,
     pub dependencies: HashMap<String, String>, // name: version
@@ -52,7 +68,7 @@ pub struct InstalledDependency {
 
 #[derive(Serialize, Deserialize, Debug)]
 pub struct InstallState {
-    pub game_version: String,
+    pub game_version: GameVersion,
     pub loader: Loader,
     pub installed_dependencies: HashMap<String, InstalledDependency>,
 }

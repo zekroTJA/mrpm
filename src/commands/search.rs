@@ -31,7 +31,7 @@ pub struct Search {
 
     /// Used Minecraft game version
     #[arg(short, long)]
-    version: Option<String>,
+    version: Option<Vec<String>>,
 
     /// Search result limit
     #[arg(long, default_value_t = NonZeroUsize::new(10).unwrap())]
@@ -52,17 +52,17 @@ impl Command for Search {
 
         let loader = self.loader.as_ref().or(project.as_ref().map(|p| &p.loader));
 
-        let version = self
+        let versions = self
             .version
-            .as_ref()
-            .or(project.as_ref().map(|p| &p.game_version));
+            .clone()
+            .or(project.as_ref().map(|p| p.game_version.as_list().to_vec()));
 
         let mut facets = vec![];
         if let Some(loader) = loader {
-            facets.push([format!("categories:{loader}")]);
+            facets.push(vec![format!("categories:{loader}")]);
         }
-        if let Some(version) = version {
-            facets.push([format!("versions:{version}")]);
+        if let Some(versions) = versions {
+            facets.push(versions.iter().map(|v| format!("versions:{v}")).collect());
         }
 
         let results = modrinth::search_projects(

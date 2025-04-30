@@ -67,19 +67,13 @@ impl Manager {
         let versions = modrinth::get_project_versions(
             slug_or_id,
             Some(&[&self.project.loader]),
-            Some(&[&self.project.game_version]),
+            Some(self.project.game_version.as_list()),
             None,
         )?;
 
         let target_version = match version {
             Some(version) => versions.iter().find(|v| v.version_number == version),
-            None => versions
-                .iter()
-                .find(|v| v.version_type == VersionType::Release)
-                .or(versions
-                    .iter()
-                    .find(|v| v.version_type == VersionType::Beta))
-                .or(versions.first()),
+            None => versions.first(),
         }
         .ok_or_else(|| anyhow::anyhow!("no suitable version found"))?;
 
@@ -121,13 +115,14 @@ impl Manager {
             None => Ok(InstallResult::New(target_version.name.to_string())),
         };
 
-        self.state
-            .installed_dependencies
-            .insert(slug_or_id.into(), models::InstalledDependency {
+        self.state.installed_dependencies.insert(
+            slug_or_id.into(),
+            models::InstalledDependency {
                 version_name: target_version.version_number.clone(),
                 version_id: target_version.id.clone(),
                 file_name: file.filename.clone(),
-            });
+            },
+        );
 
         self.project
             .dependencies
