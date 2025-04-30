@@ -1,5 +1,6 @@
 use core::fmt;
 use serde::{Deserialize, Serialize};
+use std::str::FromStr;
 
 macro_rules! parse_enum {
     ($enum_name:ident, $( $field:ident => $name:expr),+) => {
@@ -182,13 +183,39 @@ pub enum DependencyType {
     Embedded,
 }
 
-#[derive(Debug, Deserialize, PartialEq, Eq)]
+#[derive(Debug, Serialize, Deserialize, PartialEq, Eq, PartialOrd, Ord, Default, Clone)]
 #[serde(rename_all = "snake_case")]
 pub enum VersionType {
-    Release,
     Snapshot,
-    Beta,
     Alpha,
+    Beta,
+    #[default]
+    Release,
+}
+
+impl FromStr for VersionType {
+    type Err = &'static str;
+
+    fn from_str(s: &str) -> Result<Self, Self::Err> {
+        match s.to_lowercase().as_str() {
+            "release" => Ok(Self::Release),
+            "beta" => Ok(Self::Beta),
+            "alpha" => Ok(Self::Alpha),
+            "snapshot" => Ok(Self::Snapshot),
+            _ => Err("invalid version type"),
+        }
+    }
+}
+
+impl fmt::Display for VersionType {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        match self {
+            Self::Release => write!(f, "release"),
+            Self::Beta => write!(f, "beta"),
+            Self::Alpha => write!(f, "alpha"),
+            Self::Snapshot => write!(f, "snapshot"),
+        }
+    }
 }
 
 #[derive(Debug, Deserialize)]

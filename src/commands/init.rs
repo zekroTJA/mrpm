@@ -24,6 +24,10 @@ pub struct Init {
     /// relative to the project directory
     #[arg(short, long)]
     artifacts_dir: Option<PathBuf>,
+
+    /// Minimum allowed version type
+    #[arg(short, long)]
+    minimum_version_type: Option<VersionType>,
 }
 
 impl Command for Init {
@@ -74,10 +78,22 @@ impl Command for Init {
             }
         };
 
+        let minimum_version_type = match &self.minimum_version_type {
+            Some(v) => v.clone(),
+            None => {
+                let p = inquire::Select::new(
+                    "Minimum version type",
+                    vec![VersionType::Release, VersionType::Beta, VersionType::Alpha],
+                );
+                p.prompt()?
+            }
+        };
+
         let project = Project {
             game_version: GameVersion::Single(game_version),
             loader,
             artifacts_dir,
+            minimum_version_type: Some(minimum_version_type),
             dependencies: HashMap::new(),
         };
 

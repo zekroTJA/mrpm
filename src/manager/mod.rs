@@ -1,6 +1,5 @@
 pub mod models;
 
-use crate::modrinth::models::VersionType;
 use crate::modrinth::{self};
 use crate::{print_install_error, print_install_new, print_install_skipped, print_install_updated};
 use anyhow::Result;
@@ -40,6 +39,7 @@ impl Manager {
         let state = InstallState::load(&artifacts_dir)?.unwrap_or_else(|| InstallState {
             game_version: project.game_version.clone(),
             loader: project.loader.clone(),
+            minimum_version_type: project.minimum_version_type.clone().unwrap_or_default(),
             installed_dependencies: HashMap::new(),
         });
 
@@ -71,9 +71,17 @@ impl Manager {
             None,
         )?;
 
+        let mimimum_version_type = self
+            .project
+            .minimum_version_type
+            .clone()
+            .unwrap_or_default();
+
         let target_version = match version {
             Some(version) => versions.iter().find(|v| v.version_number == version),
-            None => versions.first(),
+            None => versions
+                .iter()
+                .find(|v| v.version_type >= mimimum_version_type),
         }
         .ok_or_else(|| anyhow::anyhow!("no suitable version found"))?;
 
@@ -112,7 +120,7 @@ impl Manager {
                 d.version_name.to_string(),
                 target_version.name.to_string(),
             )),
-            None => Ok(InstallResult::New(target_version.name.to_string())),
+            None => Ok(InstallResult::New(target_version.version_number.clone())),
         };
 
         self.state.installed_dependencies.insert(

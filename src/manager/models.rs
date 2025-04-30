@@ -1,4 +1,4 @@
-use crate::modrinth::models::Loader;
+use crate::modrinth::models::{Loader, VersionType};
 use anyhow::Result;
 use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
@@ -31,6 +31,7 @@ impl GameVersion {
 pub struct Project {
     pub game_version: GameVersion,
     pub loader: Loader,
+    pub minimum_version_type: Option<VersionType>,
     pub artifacts_dir: PathBuf,
     pub dependencies: HashMap<String, String>, // name: version
 }
@@ -70,6 +71,7 @@ pub struct InstalledDependency {
 pub struct InstallState {
     pub game_version: GameVersion,
     pub loader: Loader,
+    pub minimum_version_type: VersionType,
     pub installed_dependencies: HashMap<String, InstalledDependency>,
 }
 
