@@ -69,9 +69,6 @@ pub struct InstalledDependency {
 
 #[derive(Serialize, Deserialize, Debug)]
 pub struct InstallState {
-    pub game_version: GameVersion,
-    pub loader: Loader,
-    pub minimum_version_type: VersionType,
     pub installed_dependencies: HashMap<String, InstalledDependency>,
 }
 

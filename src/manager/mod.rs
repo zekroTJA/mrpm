@@ -37,9 +37,6 @@ impl Manager {
         }
 
         let state = InstallState::load(&artifacts_dir)?.unwrap_or_else(|| InstallState {
-            game_version: project.game_version.clone(),
-            loader: project.loader.clone(),
-            minimum_version_type: project.minimum_version_type.clone().unwrap_or_default(),
             installed_dependencies: HashMap::new(),
         });
 
