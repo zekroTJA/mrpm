@@ -6,7 +6,7 @@ on:
     tags: ["v[0-9]+.[0-9]+.[0-9]+*"]
 
 jobs:
-  release:
+  build_artifacts:
     name: Build for ${{ matrix.os_name }}
     runs-on: ${{ matrix.os }}
     strategy:
