@@ -5,13 +5,17 @@ use anyhow::Result;
 use clap::Args;
 use std::path::Path;
 
-const LONG_ABOUT: &str = "";
+const LONG_ABOUT: &str = "\
+Update installed packages or update packages defined in the project file.
 
-/// Install packages
+You can specify a specific version to update as following:
+$ mrpm update <project>@<version>";
+
+/// Update packages
 #[derive(Args)]
 #[command(alias = "u", long_about = LONG_ABOUT)]
 pub struct Update {
-    // List of packages to install
+    // List of packages to update
     packages: Vec<InstallRef>,
 }
 
@@ -37,7 +41,7 @@ impl Command for Update {
         manager.store()?;
 
         if is_err {
-            anyhow::bail!("Failed to install some packages.")
+            anyhow::bail!("Failed to update some packages.")
         }
 
         Ok(())
