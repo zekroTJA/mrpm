@@ -3,8 +3,9 @@
 pub mod models;
 
 use anyhow::Result;
-use models::{GameVersion, Loader, Project, SearchResults, Version};
+use models::{GameVersion, Index, Loader, Project, SearchResults, Version};
 use reqwest::{Url, blocking::get};
+use serde::Serialize;
 use std::fmt;
 
 const BASE_URL: &str = "https://api.modrinth.com/v2";
@@ -17,35 +18,19 @@ pub fn get_project(slug_or_id: &str) -> Result<Project> {
         .json()?)
 }
 
-pub enum Index {
-    Relevance,
-    Downloads,
-    Follows,
-    Newest,
-    Updated,
-}
-
-impl fmt::Display for Index {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        match self {
-            Index::Relevance => write!(f, "relevance"),
-            Index::Downloads => write!(f, "downloads"),
-            Index::Follows => write!(f, "follows"),
-            Index::Newest => write!(f, "newest"),
-            Index::Updated => write!(f, "updated"),
-        }
-    }
-}
-
 /// # Documentation
 /// See: https://docs.modrinth.com/api/operations/searchprojects/
-pub fn search_projects(
+pub fn search_projects<S, O>(
     query: &str,
-    facets: Option<&[&[&str]]>,
-    index: Option<Index>,
+    facets: Option<&[O]>,
+    index: Option<&Index>,
     offset: Option<usize>,
     limit: Option<usize>,
-) -> Result<SearchResults> {
+) -> Result<SearchResults>
+where
+    S: AsRef<str> + Serialize,
+    O: IntoIterator<Item = S> + Serialize,
+{
     let mut url = Url::parse(&format!("{BASE_URL}/search"))?;
 
     url.query_pairs_mut().append_pair("query", query);

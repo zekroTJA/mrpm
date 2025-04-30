@@ -24,7 +24,7 @@ pub struct Init {
 
     /// Used Minecraft game version
     #[arg(short, long)]
-    game_version: Option<String>,
+    version: Option<String>,
 
     /// Directory where artifacts will be stored
     /// relative to the project directory
@@ -54,7 +54,7 @@ impl Command for Init {
             }
         };
 
-        let game_version = match &self.game_version {
+        let game_version = match &self.version {
             Some(v) => {
                 if !game_versions.iter().any(|c| &c.version == v) {
                     anyhow::bail!("the specified game version does not exist");

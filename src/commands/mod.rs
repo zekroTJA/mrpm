@@ -16,6 +16,7 @@ re_export! {
     init
     install
     update
+    search
 }
 
 pub trait Command {

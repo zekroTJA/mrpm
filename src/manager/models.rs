@@ -98,12 +98,12 @@ impl FromStr for InstallRef {
                 return Err("package version must be defined after @");
             }
             return Ok(InstallRef {
-                id_or_slug: id.to_string(),
+                id_or_slug: id.to_lowercase(),
                 version: Some(version.to_string()),
             });
         }
         Ok(InstallRef {
-            id_or_slug: s.to_string(),
+            id_or_slug: s.to_lowercase(),
             version: None,
         })
     }

@@ -94,6 +94,16 @@ parse_enum! {
     Waterfall => "waterfall"
 }
 
+parse_enum! {
+    Index,
+
+    Relevance => "relevance",
+    Downloads => "downloads",
+    Follows => "follows",
+    Newest => "newest",
+    Updated => "updated"
+}
+
 #[derive(Deserialize, Debug)]
 pub struct DontationUrl {
     pub id: String,
