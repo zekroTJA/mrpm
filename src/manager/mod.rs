@@ -1,17 +1,14 @@
 pub mod models;
 
-use crate::{
-    modrinth::{self, models::VersionType},
-    print_install_error, print_install_new, print_install_skipped, print_install_updated,
-};
+use crate::modrinth::models::VersionType;
+use crate::modrinth::{self};
+use crate::{print_install_error, print_install_new, print_install_skipped, print_install_updated};
 use anyhow::Result;
 use models::{InstallRef, InstallState, Project};
-use std::{
-    collections::HashMap,
-    fs::{self, File},
-    io::ErrorKind,
-    path::PathBuf,
-};
+use std::collections::HashMap;
+use std::fs::{self, File};
+use std::io::ErrorKind;
+use std::path::PathBuf;
 use yansi::Paint;
 
 pub enum InstallResult {

@@ -1,18 +1,12 @@
 use super::Command;
-use crate::{
-    manager::models::Project,
-    modrinth::{
-        self,
-        models::{Loader, VersionType},
-    },
-};
+use crate::manager::models::Project;
+use crate::modrinth::models::{Loader, VersionType};
+use crate::modrinth::{self};
 use anyhow::Result;
 use clap::Args;
-use std::{
-    collections::HashMap,
-    path::{Path, PathBuf},
-    str::FromStr,
-};
+use std::collections::HashMap;
+use std::path::{Path, PathBuf};
+use std::str::FromStr;
 use yansi::Paint;
 
 /// Initialize a new project

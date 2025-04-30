@@ -1,14 +1,12 @@
 use crate::modrinth::models::Loader;
 use anyhow::Result;
 use serde::{Deserialize, Serialize};
-use std::{
-    collections::HashMap,
-    fmt,
-    fs::{self, File},
-    io::{ErrorKind, Read, Write},
-    path::{Path, PathBuf},
-    str::FromStr,
-};
+use std::collections::HashMap;
+use std::fmt;
+use std::fs::{self, File};
+use std::io::{ErrorKind, Read, Write};
+use std::path::{Path, PathBuf};
+use std::str::FromStr;
 
 const PROJECT_FILENAME: &str = "mrpm.project.toml";
 const INSTALLSTATE_FILENAME: &str = ".mrpm.install-state.json";

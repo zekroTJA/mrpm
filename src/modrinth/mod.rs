@@ -4,9 +4,9 @@ pub mod models;
 
 use anyhow::Result;
 use models::{GameVersion, Index, Loader, Project, SearchResults, Version};
-use reqwest::{Url, blocking::get};
+use reqwest::Url;
+use reqwest::blocking::get;
 use serde::Serialize;
-use std::fmt;
 
 const BASE_URL: &str = "https://api.modrinth.com/v2";
 

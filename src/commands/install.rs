@@ -1,5 +1,6 @@
 use super::Command;
-use crate::manager::{Manager, models::InstallRef};
+use crate::manager::Manager;
+use crate::manager::models::InstallRef;
 use anyhow::Result;
 use clap::Args;
 use std::path::Path;

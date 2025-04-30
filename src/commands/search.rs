@@ -1,14 +1,11 @@
 use super::Command;
-use crate::{
-    manager::models::Project,
-    modrinth::{
-        self,
-        models::{Index, Loader},
-    },
-};
+use crate::manager::models::Project;
+use crate::modrinth::models::{Index, Loader};
+use crate::modrinth::{self};
 use anyhow::Result;
 use clap::Args;
-use std::{num::NonZeroUsize, path::Path};
+use std::num::NonZeroUsize;
+use std::path::Path;
 use yansi::Paint;
 
 const LONG_ABOUT: &str = "\
@@ -73,7 +70,7 @@ impl Command for Search {
 
         let results = modrinth::search_projects(
             &self.query,
-            Some(&facets),
+            if facets.is_empty() { None } else { Some(&facets) },
             Some(&self.order),
             Some(self.offset),
             Some(self.limit.get()),
