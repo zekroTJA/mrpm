@@ -54,7 +54,7 @@ impl Command for Init {
 
         let game_version = match &self.version {
             Some(v) => {
-                if !game_versions.iter().any(|c| &c.version == v) {
+                if !game_versions.iter().any(|c| c.version == v.to_string()) {
                     anyhow::bail!("the specified game version does not exist");
                 }
                 v.clone()
@@ -65,7 +65,7 @@ impl Command for Init {
                     .filter(|v| v.version_type == VersionType::Release)
                     .collect();
                 let p = inquire::Select::new("Game version", release_versions);
-                p.prompt()?.version.clone()
+                p.prompt()?.version.parse()?
             }
         };
 

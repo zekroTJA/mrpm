@@ -274,7 +274,7 @@ pub struct Version {
 
 #[derive(Deserialize, Debug)]
 pub struct GameVersion {
-    pub version: loose_semver::Version,
+    pub version: String,
     pub version_type: VersionType,
     pub date: String,
     pub major: bool,
