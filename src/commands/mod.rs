@@ -17,6 +17,7 @@ re_export! {
     install
     update
     search
+    remove
 }
 
 pub trait Command {

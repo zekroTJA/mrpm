@@ -33,7 +33,9 @@ impl Command for Update {
                     version: None,
                 })
                 .collect();
-            manager.install_packages(p.iter(), true)
+            let ok_install = manager.install_packages(p.iter(), true);
+            let ok_remove = manager.uninstall_removed_packages();
+            ok_install && ok_remove
         } else {
             manager.install_packages(self.packages.iter(), true)
         };

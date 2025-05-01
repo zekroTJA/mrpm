@@ -48,3 +48,17 @@ macro_rules! print_install_skipped {
         )
     };
 }
+
+#[macro_export]
+macro_rules! print_removed {
+    ($package:expr, $version:expr) => {
+        println!(
+            "{}{}{} {} ({})",
+            '['.dim(),
+            '-'.yellow().bright().bold(),
+            ']'.dim(),
+            $package,
+            $version.yellow()
+        )
+    };
+}

@@ -1,13 +1,17 @@
 pub mod models;
 
 use crate::modrinth::{self};
-use crate::{print_install_error, print_install_new, print_install_skipped, print_install_updated};
+use crate::{
+    print_install_error, print_install_new, print_install_skipped, print_install_updated,
+    print_removed,
+};
 use anyhow::Result;
+use core::fmt;
 use models::{InstallRef, InstallState, Project};
 use std::collections::HashMap;
 use std::fs::{self, File};
-use std::io::ErrorKind;
-use std::path::PathBuf;
+use std::io::{self, ErrorKind};
+use std::path::{Path, PathBuf};
 use yansi::Paint;
 
 pub enum InstallResult {
@@ -47,7 +51,78 @@ impl Manager {
         })
     }
 
-    pub fn install_package(
+    pub fn install_packages<'a, I>(&mut self, packages: I, force: bool) -> bool
+    where
+        I: Iterator<Item = &'a InstallRef>,
+    {
+        let mut is_err = false;
+
+        for package in packages {
+            match self.install_package(&package.id_or_slug, package.version.as_deref(), force) {
+                Ok(InstallResult::New(v)) => print_install_new!(package, v),
+                Ok(InstallResult::Updated(p, v)) => print_install_updated!(package, p, v),
+                Ok(InstallResult::Skipped(v)) => print_install_skipped!(package, v),
+                Err(err) => {
+                    print_install_error!(package, "{err}");
+                    is_err = true;
+                }
+            }
+        }
+
+        is_err
+    }
+
+    pub fn uninstall_removed_packages(&mut self) -> bool {
+        let mut is_err = false;
+
+        let removed = self
+            .state
+            .installed_dependencies
+            .iter()
+            .filter(|d| !self.project.dependencies.contains_key(d.0));
+
+        let mut deleted = vec![];
+
+        for (key, dep) in removed {
+            match remove_file_oknotfound(self.artifacts_dir().join(&dep.file_name)) {
+                Err(err) => {
+                    print_install_error!(key, "remove failed: {err}");
+                    is_err = true;
+                }
+                Ok(_) => {
+                    print_removed!(key, dep.version_name);
+                    deleted.push(key.clone());
+                }
+            }
+        }
+
+        for k in deleted {
+            self.state.installed_dependencies.remove(&k);
+        }
+
+        is_err
+    }
+
+    pub fn uninstall_packages<S>(&mut self, packages: &[S]) -> bool
+    where
+        S: AsRef<str> + fmt::Display,
+    {
+        let mut is_err = false;
+
+        for package in packages {
+            match self.uninstall_package(package.as_ref()) {
+                Ok(v) => print_removed!(package, v),
+                Err(err) => {
+                    print_install_error!(package, "remove failed: {err}");
+                    is_err = true;
+                }
+            }
+        }
+
+        is_err
+    }
+
+    fn install_package(
         &mut self,
         slug_or_id: &str,
         version: Option<&str>,
@@ -107,9 +182,8 @@ impl Manager {
             })?;
 
         if let Some(installed_dep) = installed_dep {
-            match fs::remove_file(self.artifacts_dir().join(&installed_dep.file_name)) {
+            match remove_file_oknotfound(self.artifacts_dir().join(&installed_dep.file_name)) {
                 Ok(_) => {}
-                Err(err) if err.kind() == ErrorKind::NotFound => {}
                 Err(err) => return Err(err.into()),
             }
         }
@@ -143,25 +217,20 @@ impl Manager {
         res
     }
 
-    pub fn install_packages<'a, I>(&mut self, packages: I, force: bool) -> bool
-    where
-        I: Iterator<Item = &'a InstallRef>,
-    {
-        let mut is_err = false;
-
-        for package in packages {
-            match self.install_package(&package.id_or_slug, package.version.as_deref(), force) {
-                Ok(InstallResult::New(v)) => print_install_new!(package, v),
-                Ok(InstallResult::Updated(p, v)) => print_install_updated!(package, p, v),
-                Ok(InstallResult::Skipped(v)) => print_install_skipped!(package, v),
-                Err(err) => {
-                    print_install_error!(package, "{err}");
-                    is_err = true;
-                }
+    fn uninstall_package(&mut self, key: &str) -> Result<String> {
+        let version = match self.state.installed_dependencies.get(key) {
+            Some(dep) => {
+                remove_file_oknotfound(self.artifacts_dir().join(&dep.file_name))?;
+                Some(dep.version_name.clone())
             }
+            None => self.project.dependencies.get(key).cloned(),
         }
+        .ok_or_else(|| anyhow::anyhow!("package {key} is not installed"))?;
 
-        is_err
+        self.state.installed_dependencies.remove(key);
+        self.project.dependencies.remove(key);
+
+        Ok(version)
     }
 
     pub fn store(&self) -> Result<()> {
@@ -172,5 +241,12 @@ impl Manager {
 
     fn artifacts_dir(&self) -> PathBuf {
         self.dir.join(&self.project.artifacts_dir)
+    }
+}
+
+fn remove_file_oknotfound<P: AsRef<Path>>(path: P) -> io::Result<()> {
+    match fs::remove_file(path) {
+        Err(err) if err.kind() == ErrorKind::NotFound => Ok(()),
+        res => res,
     }
 }

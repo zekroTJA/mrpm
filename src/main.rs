@@ -25,6 +25,7 @@ register_commands! {
     Install
     Update
     Search
+    Remove
 }
 
 fn main() -> Result<()> {

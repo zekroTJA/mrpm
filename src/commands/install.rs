@@ -30,7 +30,9 @@ impl Command for Install {
                 .iter()
                 .map(|kv| kv.into())
                 .collect();
-            manager.install_packages(p.iter(), false)
+            let ok_install = manager.install_packages(p.iter(), false);
+            let ok_remove = manager.uninstall_removed_packages();
+            ok_install && ok_remove
         } else {
             manager.install_packages(self.packages.iter(), false)
         };
