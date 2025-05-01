@@ -61,12 +61,19 @@ impl Manager {
             }
         }
 
-        let versions = modrinth::get_project_versions(
+        let mut versions = modrinth::get_project_versions(
             slug_or_id,
             Some(&[&self.project.loader]),
             Some(self.project.game_version.as_list()),
             None,
         )?;
+
+        versions.sort_by(|a, b| {
+            b.game_versions
+                .as_ref()
+                .and_then(|v| v.first())
+                .cmp(&a.game_versions.as_ref().and_then(|v| v.first()))
+        });
 
         let mimimum_version_type = self
             .project

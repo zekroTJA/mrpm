@@ -142,7 +142,7 @@ pub struct Project {
     pub discord_url: Option<String>,
     pub donation_urls: Option<Vec<DontationUrl>>,
     pub versions: Vec<String>,
-    pub game_versions: Vec<String>,
+    pub game_versions: Vec<loose_semver::Version>,
     pub loaders: Vec<Loader>,
 }
 
@@ -259,7 +259,7 @@ pub struct Version {
     pub version_number: String,
     pub changelog: Option<String>,
     pub dependencies: Option<Vec<Dependency>>,
-    pub game_versions: Option<Vec<String>>,
+    pub game_versions: Option<Vec<loose_semver::Version>>,
     pub version_type: VersionType,
     pub loaders: Vec<Loader>,
     pub featured: bool,
@@ -274,7 +274,7 @@ pub struct Version {
 
 #[derive(Deserialize, Debug)]
 pub struct GameVersion {
-    pub version: String,
+    pub version: loose_semver::Version,
     pub version_type: VersionType,
     pub date: String,
     pub major: bool,
@@ -282,6 +282,6 @@ pub struct GameVersion {
 
 impl fmt::Display for GameVersion {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.write_str(&self.version)
+        write!(f, "{}", self.version)
     }
 }

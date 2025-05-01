@@ -28,7 +28,7 @@ pub fn search_projects<S, O>(
     limit: Option<usize>,
 ) -> Result<SearchResults>
 where
-    S: AsRef<str> + Serialize,
+    S: ToString + Serialize,
     O: IntoIterator<Item = S> + Serialize,
 {
     let mut url = Url::parse(&format!("{BASE_URL}/search"))?;
@@ -67,7 +67,7 @@ pub fn get_project_versions<S>(
     featured: Option<bool>,
 ) -> Result<Vec<Version>>
 where
-    S: AsRef<str> + Serialize,
+    S: ToString + Serialize,
 {
     let mut url = Url::parse(&format!("{BASE_URL}/project/{id_or_slug}/version"))?;
 

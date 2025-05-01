@@ -14,12 +14,12 @@ const INSTALLSTATE_FILENAME: &str = ".mrpm.install-state.json";
 #[derive(Serialize, Deserialize, Debug, Clone)]
 #[serde(untagged)]
 pub enum GameVersion {
-    Single(String),
-    Multiple(Vec<String>),
+    Single(loose_semver::Version),
+    Multiple(Vec<loose_semver::Version>),
 }
 
 impl GameVersion {
-    pub fn as_list(&self) -> &[String] {
+    pub fn as_list(&self) -> &[loose_semver::Version] {
         match self {
             GameVersion::Single(s) => std::slice::from_ref(s),
             GameVersion::Multiple(v) => v.as_slice(),

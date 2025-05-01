@@ -31,7 +31,7 @@ pub struct Search {
 
     /// Used Minecraft game version
     #[arg(short, long)]
-    version: Option<Vec<String>>,
+    version: Option<Vec<loose_semver::Version>>,
 
     /// Search result limit
     #[arg(long, default_value_t = NonZeroUsize::new(10).unwrap())]

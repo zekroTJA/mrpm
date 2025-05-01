@@ -18,7 +18,7 @@ pub struct Init {
 
     /// Used Minecraft game version
     #[arg(short, long)]
-    version: Option<String>,
+    version: Option<loose_semver::Version>,
 
     /// Directory where artifacts will be stored
     /// relative to the project directory
