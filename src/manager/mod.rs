@@ -2,8 +2,8 @@ pub mod models;
 
 use crate::modrinth::{self};
 use crate::{
-    print_install_error, print_install_new, print_install_skipped, print_install_updated,
-    print_removed,
+    log_verbose, logger, print_install_error, print_install_new, print_install_skipped,
+    print_install_updated, print_removed,
 };
 use anyhow::Result;
 use core::fmt;
@@ -29,20 +29,25 @@ pub struct Manager {
 impl Manager {
     pub fn new<P: Into<PathBuf>>(dir: P) -> Result<Self> {
         let dir = dir.into();
+        log_verbose!("[manager] project dir = {dir:?}");
 
         let project = Project::load(&dir)?.ok_or_else(|| {
             anyhow::anyhow!("no project has been initialized in the project directory")
         })?;
+        log_verbose!("[manager] project = {project:?}");
 
         let artifacts_dir = dir.join(&project.artifacts_dir);
+        log_verbose!("[manager] artifacts dir = {artifacts_dir:?}");
 
         if !artifacts_dir.exists() {
+            log_verbose!("[manager] creating artifacts dir");
             fs::create_dir_all(&artifacts_dir)?;
         }
 
         let state = InstallState::load(&artifacts_dir)?.unwrap_or_else(|| InstallState {
             installed_dependencies: HashMap::new(),
         });
+        log_verbose!("[manager] state = {state:?}");
 
         Ok(Self {
             dir,
@@ -73,6 +78,8 @@ impl Manager {
     }
 
     pub fn uninstall_removed_packages(&mut self) -> bool {
+        log_verbose!("[manager] uninstalling removed packages");
+
         let mut is_err = false;
 
         let removed = self
@@ -84,6 +91,7 @@ impl Manager {
         let mut deleted = vec![];
 
         for (key, dep) in removed {
+            log_verbose!("[manager] uninstalling dep key={key}");
             match remove_file_oknotfound(self.artifacts_dir().join(&dep.file_name)) {
                 Err(err) => {
                     print_install_error!(key, "remove failed: {err}");
@@ -128,7 +136,12 @@ impl Manager {
         version: Option<&str>,
         force: bool,
     ) -> Result<InstallResult> {
+        log_verbose!(
+            "[manager] installing package slug_or_id={slug_or_id} version={version:?} force={force}"
+        );
+
         let installed_dep = self.state.installed_dependencies.get(slug_or_id);
+        log_verbose!("[manager] installed_dep = {installed_dep:?}");
 
         if let Some(d) = installed_dep {
             if !force && (version.is_some_and(|v| v == d.version_name) || version.is_none()) {
@@ -150,6 +163,11 @@ impl Manager {
                 .cmp(&a.game_versions.as_ref().and_then(|v| v.first()))
         });
 
+        log_verbose!(
+            "[manager] fetched project versions = {}",
+            logger::DisplayList(&versions)
+        );
+
         let mimimum_version_type = self
             .project
             .minimum_version_type
@@ -163,6 +181,8 @@ impl Manager {
                 .find(|v| v.version_type >= mimimum_version_type),
         }
         .ok_or_else(|| anyhow::anyhow!("no suitable version found"))?;
+
+        log_verbose!("[manager] target_version = {target_version}");
 
         if let Some(d) = installed_dep {
             if d.version_id == target_version.id {
@@ -181,13 +201,20 @@ impl Manager {
                 )
             })?;
 
+        log_verbose!("[manager] file = {file:?}");
+
         if let Some(installed_dep) = installed_dep {
+            log_verbose!(
+                "[manager] removing previously installed file name={}",
+                &installed_dep.file_name
+            );
             match remove_file_oknotfound(self.artifacts_dir().join(&installed_dep.file_name)) {
                 Ok(_) => {}
                 Err(err) => return Err(err.into()),
             }
         }
 
+        log_verbose!("[manager] downloading new file url={}", &file.url);
         let mut f = File::create(self.artifacts_dir().join(&file.filename))?;
         reqwest::blocking::get(&file.url)?
             .error_for_status()?
@@ -201,14 +228,13 @@ impl Manager {
             None => Ok(InstallResult::New(target_version.version_number.clone())),
         };
 
-        self.state.installed_dependencies.insert(
-            slug_or_id.into(),
-            models::InstalledDependency {
+        self.state
+            .installed_dependencies
+            .insert(slug_or_id.into(), models::InstalledDependency {
                 version_name: target_version.version_number.clone(),
                 version_id: target_version.id.clone(),
                 file_name: file.filename.clone(),
-            },
-        );
+            });
 
         self.project
             .dependencies
@@ -218,6 +244,8 @@ impl Manager {
     }
 
     fn uninstall_package(&mut self, key: &str) -> Result<String> {
+        log_verbose!("[manager] uninstalling package key={key}");
+
         let version = match self.state.installed_dependencies.get(key) {
             Some(dep) => {
                 remove_file_oknotfound(self.artifacts_dir().join(&dep.file_name))?;
@@ -227,6 +255,8 @@ impl Manager {
         }
         .ok_or_else(|| anyhow::anyhow!("package {key} is not installed"))?;
 
+        log_verbose!("[manager] package removed version={version}");
+
         self.state.installed_dependencies.remove(key);
         self.project.dependencies.remove(key);
 
@@ -234,8 +264,12 @@ impl Manager {
     }
 
     pub fn store(&self) -> Result<()> {
+        log_verbose!("[manager] storing to project file");
         self.project.store(&self.dir)?;
+
+        log_verbose!("[manager] storing to state file");
         self.state.store(self.artifacts_dir())?;
+
         Ok(())
     }
 

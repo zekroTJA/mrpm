@@ -1,4 +1,5 @@
-use core::fmt;
+use crate::logger;
+use core::fmt::{self, Display};
 use serde::{Deserialize, Serialize};
 use std::str::FromStr;
 
@@ -207,7 +208,7 @@ impl FromStr for VersionType {
     }
 }
 
-impl fmt::Display for VersionType {
+impl Display for VersionType {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match self {
             Self::Release => write!(f, "release"),
@@ -272,6 +273,18 @@ pub struct Version {
     pub files: Vec<VersionFile>,
 }
 
+impl Display for Version {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(
+            f,
+            "{} ({}) {}",
+            self.version_number,
+            self.name,
+            logger::Optional(self.game_versions.as_ref().map(|v| logger::DisplayList(v)))
+        )
+    }
+}
+
 #[derive(Deserialize, Debug)]
 pub struct GameVersion {
     pub version: String,
@@ -280,7 +293,7 @@ pub struct GameVersion {
     pub major: bool,
 }
 
-impl fmt::Display for GameVersion {
+impl Display for GameVersion {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         write!(f, "{}", self.version)
     }

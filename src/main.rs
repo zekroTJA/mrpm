@@ -1,4 +1,5 @@
 mod commands;
+mod logger;
 mod manager;
 mod modrinth;
 mod output;
@@ -15,6 +16,10 @@ struct Cli {
     #[arg(short = 'D', long, default_value = ".")]
     directory: PathBuf,
 
+    /// Enable verbose output
+    #[arg(short, long)]
+    verbose: bool,
+
     #[command(subcommand)]
     commands: Commands,
 }
@@ -30,6 +35,8 @@ register_commands! {
 
 fn main() -> Result<()> {
     let cli = Cli::parse();
+
+    logger::set_enable_verbose_logging(cli.verbose);
 
     cli.commands.run(&cli.directory)?;
 
