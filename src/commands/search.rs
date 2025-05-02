@@ -16,7 +16,7 @@ https://docs.modrinth.com/api/operations/searchprojects/";
 
 /// Search for packages
 #[derive(Args)]
-#[command(alias = "s", long_about = LONG_ABOUT)]
+#[command(visible_aliases = ["s"], long_about = LONG_ABOUT)]
 pub struct Search {
     /// Search query
     query: String,

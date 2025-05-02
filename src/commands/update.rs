@@ -13,7 +13,7 @@ $ mrpm update <project>@<version>";
 
 /// Update packages
 #[derive(Args)]
-#[command(alias = "u", long_about = LONG_ABOUT)]
+#[command(visible_aliases = ["u"], long_about = LONG_ABOUT)]
 pub struct Update {
     // List of packages to update
     packages: Vec<InstallRef>,

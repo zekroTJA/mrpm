@@ -11,6 +11,7 @@ use yansi::Paint;
 
 /// Initialize a new project
 #[derive(Args)]
+#[command(visible_aliases = ["new"])]
 pub struct Init {
     /// Used mod or plugin loader
     #[arg(short, long)]
@@ -81,10 +82,11 @@ impl Command for Init {
         let minimum_version_type = match &self.minimum_version_type {
             Some(v) => v.clone(),
             None => {
-                let p = inquire::Select::new(
-                    "Minimum version type",
-                    vec![VersionType::Release, VersionType::Beta, VersionType::Alpha],
-                );
+                let p = inquire::Select::new("Minimum version type", vec![
+                    VersionType::Release,
+                    VersionType::Beta,
+                    VersionType::Alpha,
+                ]);
                 p.prompt()?
             }
         };

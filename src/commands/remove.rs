@@ -4,11 +4,9 @@ use anyhow::Result;
 use clap::Args;
 use std::path::Path;
 
-const LONG_ABOUT: &str = "";
-
 /// Remove packages
 #[derive(Args)]
-#[command(alias = "r", long_about = LONG_ABOUT)]
+#[command(visible_aliases = ["r"])]
 pub struct Remove {
     // List of packages to remove
     #[arg(required = true)]

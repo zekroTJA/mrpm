@@ -13,7 +13,7 @@ $ mrpm install <project>@<version>";
 
 /// Install packages
 #[derive(Args)]
-#[command(alias = "i", long_about = LONG_ABOUT)]
+#[command(visible_aliases = ["i", "add", "a"], long_about = LONG_ABOUT)]
 pub struct Install {
     // List of packages to install
     packages: Vec<InstallRef>,
