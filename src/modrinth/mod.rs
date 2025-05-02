@@ -20,16 +20,16 @@ pub fn get_project(slug_or_id: &str) -> Result<Project> {
 
 /// # Documentation
 /// See: https://docs.modrinth.com/api/operations/searchprojects/
-pub fn search_projects<S, O>(
+pub fn search_projects<T>(
     query: &str,
-    facets: Option<&[O]>,
+    facets: Option<&[T]>,
     index: Option<&Index>,
     offset: Option<usize>,
     limit: Option<usize>,
 ) -> Result<SearchResults>
 where
-    S: ToString + Serialize,
-    O: IntoIterator<Item = S> + Serialize,
+    T: IntoIterator + Serialize,
+    T::Item: ToString + Serialize,
 {
     let mut url = Url::parse(&format!("{BASE_URL}/search"))?;
 
