@@ -13,7 +13,7 @@ pub fn get_verbose_logging_enabled() -> bool {
 #[macro_export]
 macro_rules! log_verbose {
     ( $($arg:tt)* ) => {
-        if crate::logger::get_verbose_logging_enabled() {
+        if $crate::logger::get_verbose_logging_enabled() {
             use yansi::Paint;
             println!("{}", format_args!("-- {}", format_args!($($arg)*)).dim());
         }
@@ -29,7 +29,7 @@ where
 {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         write!(f, "[")?;
-        let mut iter = (&self.0).into_iter();
+        let mut iter = self.0.into_iter();
         if let Some(first) = iter.next() {
             write!(f, "{first}")?;
         }

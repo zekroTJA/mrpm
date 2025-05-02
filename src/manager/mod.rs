@@ -151,7 +151,7 @@ impl Manager {
 
         let mut versions = modrinth::get_project_versions(
             slug_or_id,
-            Some(&[&self.project.loader]),
+            Some([&self.project.loader]),
             Some(self.project.game_version.as_list()),
             None,
         )?;

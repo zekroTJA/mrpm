@@ -3,6 +3,8 @@ use core::fmt::{self, Display};
 use serde::{Deserialize, Serialize};
 use std::str::FromStr;
 
+const BASE_URL: &str = "https://modrinth.com";
+
 macro_rules! parse_enum {
     ($enum_name:ident, $( $field:ident => $name:expr),+) => {
         #[derive(Debug, Deserialize, Serialize, Clone)]
@@ -48,7 +50,7 @@ macro_rules! parse_enum {
     };
 }
 
-#[derive(Deserialize, Debug)]
+#[derive(Serialize, Deserialize, Debug)]
 #[serde(rename_all = "snake_case")]
 pub enum Requirement {
     Required,
@@ -66,7 +68,7 @@ pub enum Status {
     Draft,
 }
 
-#[derive(Debug, Deserialize)]
+#[derive(Debug, Serialize, Deserialize)]
 #[serde(rename_all = "snake_case")]
 pub enum ProjectType {
     Mod,
@@ -147,7 +149,7 @@ pub struct Project {
     pub loaders: Vec<Loader>,
 }
 
-#[derive(Deserialize, Debug)]
+#[derive(Serialize, Deserialize, Debug)]
 pub struct SearchHit {
     pub slug: String,
     pub title: String,
@@ -167,7 +169,13 @@ pub struct SearchHit {
     pub latest_version: String,
 }
 
-#[derive(Deserialize, Debug)]
+impl SearchHit {
+    pub fn url(&self) -> String {
+        format!("{BASE_URL}/project/{}", self.project_id)
+    }
+}
+
+#[derive(Serialize, Deserialize, Debug)]
 pub struct SearchResults {
     pub hits: Vec<SearchHit>,
     pub offset: usize,
@@ -175,7 +183,7 @@ pub struct SearchResults {
     pub total_hits: usize,
 }
 
-#[derive(Debug, Deserialize)]
+#[derive(Debug, Serialize, Deserialize)]
 #[serde(rename_all = "snake_case")]
 pub enum DependencyType {
     Required,
@@ -219,7 +227,7 @@ impl Display for VersionType {
     }
 }
 
-#[derive(Debug, Deserialize)]
+#[derive(Debug, Serialize, Deserialize)]
 #[serde(rename_all = "snake_case")]
 pub enum VersionStatus {
     Listed,
@@ -230,7 +238,7 @@ pub enum VersionStatus {
     Unknown,
 }
 
-#[derive(Deserialize, Debug)]
+#[derive(Serialize, Deserialize, Debug)]
 pub struct Dependency {
     pub version_id: Option<String>,
     pub project_id: Option<String>,
@@ -238,7 +246,7 @@ pub struct Dependency {
     pub dependency_type: DependencyType,
 }
 
-#[derive(Deserialize, Debug)]
+#[derive(Serialize, Deserialize, Debug)]
 pub struct VersionFile {
     pub hashes: Hashes,
     pub url: String,
@@ -248,13 +256,13 @@ pub struct VersionFile {
     pub file_type: Option<String>,
 }
 
-#[derive(Deserialize, Debug)]
+#[derive(Serialize, Deserialize, Debug)]
 pub struct Hashes {
     pub sha512: String,
     pub sha1: String,
 }
 
-#[derive(Deserialize, Debug)]
+#[derive(Serialize, Deserialize, Debug)]
 pub struct Version {
     pub name: String,
     pub version_number: String,
@@ -280,7 +288,7 @@ impl Display for Version {
             "{} ({}) {}",
             self.version_number,
             self.name,
-            logger::Optional(self.game_versions.as_ref().map(|v| logger::DisplayList(v)))
+            logger::Optional(self.game_versions.as_ref().map(logger::DisplayList))
         )
     }
 }

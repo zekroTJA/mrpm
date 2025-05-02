@@ -18,6 +18,7 @@ re_export! {
     update
     search
     remove
+    versions
 }
 
 pub trait Command {

@@ -44,6 +44,10 @@ pub struct Search {
     /// Search order / index
     #[arg(long, alias = "index", default_value_t = Index::Relevance)]
     order: Index,
+
+    /// Output result in JSON format
+    #[arg(long)]
+    json: bool,
 }
 
 impl Command for Search {
@@ -73,6 +77,10 @@ impl Command for Search {
             Some(self.limit.get()),
         )?;
 
+        if self.json {
+            return serde_json::to_writer_pretty(std::io::stdout(), &results).map_err(|e| e.into());
+        }
+
         for r in &results.hits {
             if self.short {
                 println!(
@@ -85,10 +93,12 @@ impl Command for Search {
                 println!(
                     "{} {} {}\n\
                     {}\n\
+                    {}\n\
                     Categories: {}\n",
                     r.title.green().bold(),
                     format_args!("by {}", r.author).dim(),
                     format_args!("{}{}{}", '['.dim(), r.project_id.cyan(), ']'.dim()),
+                    r.url().underline().italic(),
                     r.description,
                     r.categories.join(", ")
                 );

@@ -31,6 +31,7 @@ register_commands! {
     Update
     Search
     Remove
+    Versions
 }
 
 fn main() -> Result<()> {
