@@ -1,6 +1,6 @@
 [package]
 name = "mrpm"
-version = "0.4.0"
+version = "0.4.1"
 edition = "2024"
 authors = ["zekroTJA <riho@live.de>"]
 description = "A Modrinth plugin/package manager"
@@ -14,8 +14,6 @@ license = "MIT"
 anyhow = "1"
 clap = { version = "4", features = ["derive"] }
 serde = { version = "1", features = ["derive"] }
-dirs = "6"
-figment = { version = "0.10", features = ["json", "yaml", "toml", "env"] }
 reqwest = { version = "0.12.15", default-features = false, features = [
     "blocking",
     "json",
@@ -25,7 +23,7 @@ serde_json = "1.0.140"
 inquire = "0.7.5"
 toml = "0.8.21"
 yansi = "1.0.1"
-loose-semver = { version = "1.0.0", features = ["serde"] }
+loose-semver = { version = "1.1.0" , features = ["serde-nofail"] }
 
 [profile.release]
 strip = true
